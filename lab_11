@@ -1,0 +1,34 @@
+#include "UDPSocket.h"
+
+int main()
+{
+	struct sockaddr_in si_me, si_other;
+	int slen = sizeof(si_other);
+
+	char buf[BUFLEN];
+	char response[BUFLEN] = "Message received";
+
+	UDPSocket server_sock;
+
+	memset((char*)&si_me, 0, sizeof(si_me));
+
+	si_me.sin_family = AF_INET;
+	si_me.sin_port = htons(PORT);
+	si_me.sin_addr.S_un.S_addr = INADDR_ANY;
+
+	server_sock.Bind((struct sockaddr*)&si_me, sizeof(si_me));
+
+	printf("Server listening on port %d...\n", PORT);
+
+	while (1)
+	{
+		memset(buf, 0, BUFLEN);
+		server_sock.RecvDatagram(buf, BUFLEN, (struct sockaddr*)&si_other, &slen);
+
+		printf("Received message: %s\n", buf);
+		
+		server_sock.SendDatagram(response, (int)strlen(response), (struct sockaddr*)&si_other, slen);
+	}
+
+	return 0;
+}
